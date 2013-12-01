@@ -25,7 +25,7 @@ pagenerator -i ./source_dir -o ./out_dir -t ./template.html -R --breads tr/
 ```
 
 
-## Recursive conversion with 
+## Recursive conversion with breadcrumbs
 
 When you give directory names with ``--breads`` option (You can designate more than one.),
 the breadcrumb list will be generated for HTML files under their directories.
