@@ -1,0 +1,152 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+"""
+__author__ = 'Yuta Hayashibe' 
+__version__ = ""
+__copyright__ = ""
+__license__ = "GPL v3"
+
+
+import argparse
+
+import markdown
+import codecs
+import sys
+
+import string
+
+def get_title(text):
+    for line in text.split(u"\n"):
+        line = line.lstrip().rstrip()
+        if line.startswith(u"#"):
+            return line[1:].lstrip()
+    return u""
+
+import os
+def mkdirs(folder_name):
+    assert isinstance(folder_name, unicode)
+    try:
+        os.makedirs(folder_name)
+    except OSError as exc: # Python >2.5
+        import errno
+        if exc.errno == errno.EEXIST:
+            pass
+        else: raise
+
+def convert(input_filename, template_name, output_name, encoding=u"UTF-8", bread=None):
+    (head, tail) = os.path.split(output_name)
+    if len(head) != 0:
+        mkdirs(head)
+
+    with codecs.open(input_filename, 'r', encoding) as fp:
+        content_text = fp.read()
+        title = get_title(content_text)
+    with codecs.open(template_name, 'r', encoding) as fp:
+        template = string.Template(fp.read())
+    if output_name == u"-":
+        sys.stdout = codecs.getwriter('utf_8')(sys.stdout)
+        myout = sys.stdout
+    else:
+        myout = codecs.open(output_name, 'w', encoding)
+
+    content_html = markdown.markdown(content_text, extensions=['fenced_code', 'tables'])
+    if bread is None:
+        bread = u""
+    elif bread != u"":
+        bread += u" &gt; <strong>%s</strong> " % title
+        pass
+    
+    d = {u'content' : content_html,
+            u'title' : title,
+            u"bread" : bread}
+    html = template.substitute(d)
+
+    myout.write(html)
+
+    return title
+
+
+def get_bread(pathroot, titles):
+
+    paths =  pathroot.split(u"/")
+    rets = []
+
+    for i in xrange(1, len(paths)):
+        key = u"/".join(paths[:i])
+        mytitle = titles[key]
+        rets.append(u"""<a href="/%s">%s</a>""" % (key, mytitle))
+
+    ret = u" &gt; ".join(rets)
+    return ret
+
+def clean_path(path):
+    if path.endswith(u"/"):
+        path = path[:-1]
+    elif path.endswith(u"/index"):
+        path = path[:-len(u"/index")]
+    return path
+
+def get_index_position(files):
+    for name in [u"index.md", u"index.mkd"]:
+        myindex = files.index(name)
+        if myindex != -1:
+            return myindex
+    return -1
+
+import os
+def recursive(input_filename, template_name, output_name, encoding=u"UTF-8", breads=[]):
+
+    titles = {}
+
+    for root, dirs, files in os.walk(input_filename):
+
+        #swap filenames to get names of index.md first
+        index_pos = get_index_position(files)
+        if index_pos != -1:
+            files[0], files[index_pos] = files[index_pos], files[0]
+
+        for fname in files:
+
+            myfilename = os.path.join(root, fname)
+            myoutname0 = myfilename[len(input_filename)+1:]
+            (myoutroot, myoutext) = os.path.splitext(myoutname0)
+            if myoutext not in [u".md", u".mkd"]:
+                continue
+            myoutname = os.path.join(output_name, myoutroot + u".html")
+            myoutroot2 = clean_path(myoutroot)
+            
+            mybread = None
+            flg = False
+            for bread in breads:
+                if myoutroot.startswith(bread):
+                    mybread = get_bread(myoutroot2, titles)
+                    flg = True
+                    break
+
+            title = convert(myfilename, template_name, myoutname, encoding, mybread)
+
+            if flg:
+                titles[myoutroot2] = title
+            print myfilename, myoutname, title.encode("utf8")
+
+
+
+if __name__ == '__main__':
+    oparser = argparse.ArgumentParser(description='A generator of a web page')
+
+    oparser.add_argument('-i', '--input', dest = 'input', type=unicode, help='', required=True)
+    oparser.add_argument('-o', '--output', dest = 'output', type=unicode, help='', required=True)
+    oparser.add_argument('-t', '--template', dest = 'template', type=unicode, help='', required=True)
+
+    oparser.add_argument('-R', dest='recursive', action="store_true", help='Convert recursively', default=False)
+    oparser.add_argument('--breads', dest='breads', action="append", help='Make breadCrumb for this prefix paths', default=[], type=unicode)
+    opts = oparser.parse_args()
+
+    if opts.recursive:
+        recursive(opts.input, opts.template, opts.output, breads=opts.breads)
+    else:
+        convert(opts.input, opts.template, opts.output)
+
+

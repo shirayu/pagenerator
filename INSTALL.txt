@@ -1,0 +1,5 @@
+To install this, run setup.py from an administrator account, e.g.:
+
+    sudo python setup.py install
+
+
