@@ -35,6 +35,7 @@ def mkdirs(folder_name):
             pass
         else: raise
 
+import os
 def convert(input_filename, template_name, output_name, encoding=u"UTF-8", bread=None):
     (head, tail) = os.path.split(output_name)
     if len(head) != 0:
@@ -45,10 +46,15 @@ def convert(input_filename, template_name, output_name, encoding=u"UTF-8", bread
         title = get_title(content_text)
     with codecs.open(template_name, 'r', encoding) as fp:
         template = string.Template(fp.read())
+
     if output_name == u"-":
         sys.stdout = codecs.getwriter('utf_8')(sys.stdout)
         myout = sys.stdout
     else:
+        if os.path.exists(output_name) and \
+                os.stat(input_filename).st_mtime < os.stat(output_name).st_mtime:
+            return title
+
         myout = codecs.open(output_name, 'w', encoding)
 
     content_html = markdown.markdown(content_text, extensions=['fenced_code', 'tables'])
