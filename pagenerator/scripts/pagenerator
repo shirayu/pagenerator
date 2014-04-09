@@ -36,7 +36,9 @@ def mkdirs(folder_name):
         else: raise
 
 import os
-def convert(input_filename, template_name, output_name, encoding=u"UTF-8", bread=None):
+def convert(input_filename, template_name, output_name, encoding=u"UTF-8", bread=None, force=False):
+    isinstance(force, bool)
+
     (head, tail) = os.path.split(output_name)
     if len(head) != 0:
         mkdirs(head)
@@ -51,7 +53,7 @@ def convert(input_filename, template_name, output_name, encoding=u"UTF-8", bread
         sys.stdout = codecs.getwriter('utf_8')(sys.stdout)
         myout = sys.stdout
     else:
-        if os.path.exists(output_name) and \
+        if not force and os.path.exists(output_name) and \
                 os.stat(input_filename).st_mtime < os.stat(output_name).st_mtime:
             return title
 
@@ -102,7 +104,8 @@ def get_index_position(files):
     return -1
 
 import os
-def recursive(input_filename, template_name, output_name, encoding=u"UTF-8", breads=[]):
+def recursive(input_filename, template_name, output_name, encoding=u"UTF-8", breads=[], force=False):
+    isinstance(force, bool)
 
     titles = {}
 
@@ -131,7 +134,7 @@ def recursive(input_filename, template_name, output_name, encoding=u"UTF-8", bre
                     flg = True
                     break
 
-            title = convert(myfilename, template_name, myoutname, encoding, mybread)
+            title = convert(myfilename, template_name, myoutname, encoding, bread=mybread, force=force)
 
             if flg:
                 titles[myoutroot2] = title
@@ -147,12 +150,13 @@ if __name__ == '__main__':
     oparser.add_argument('-t', '--template', dest = 'template', type=unicode, help='', required=True)
 
     oparser.add_argument('-R', dest='recursive', action="store_true", help='Convert recursively', default=False)
+    oparser.add_argument('-f', '--force', dest='force', action="store_true", help='Force generation', default=False)
     oparser.add_argument('--breads', dest='breads', action="append", help='Make breadCrumb for this prefix paths', default=[], type=unicode)
     opts = oparser.parse_args()
 
     if opts.recursive:
-        recursive(opts.input, opts.template, opts.output, breads=opts.breads)
+        recursive(opts.input, opts.template, opts.output, breads=opts.breads, force=opts.force)
     else:
-        convert(opts.input, opts.template, opts.output)
+        convert(opts.input, opts.template, opts.output, opts.force)
 
 
