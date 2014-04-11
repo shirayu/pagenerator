@@ -54,7 +54,8 @@ def convert(input_filename, template_name, output_name, encoding=u"UTF-8", bread
         myout = sys.stdout
     else:
         if not force and os.path.exists(output_name) and \
-                os.stat(input_filename).st_mtime < os.stat(output_name).st_mtime:
+                os.stat(input_filename).st_mtime < os.stat(output_name).st_mtime and \
+                os.stat(template_name).st_mtime < os.stat(output_name).st_mtime:
             return title
 
         myout = codecs.open(output_name, 'w', encoding)
