@@ -64,7 +64,7 @@ def convert(input_filename, template_name, output_name, encoding=u"UTF-8", bread
     if bread is None:
         bread = u""
     elif bread != u"":
-        bread += u" &gt; <strong>%s</strong> " % title
+        bread += u""" &gt; <strong itemprop="title">%s</strong> """ % title
         pass
     
     d = {u'content' : content_html,
@@ -85,7 +85,7 @@ def get_bread(pathroot, titles):
     for i in xrange(1, len(paths)):
         key = u"/".join(paths[:i])
         mytitle = titles[key]
-        rets.append(u"""<a href="/%s">%s</a>""" % (key, mytitle))
+        rets.append(u"""<a href="/%s" itemprop="url"><span itemprop="title">%s</span></a>""" % (key, mytitle))
 
     ret = u" &gt; ".join(rets)
     return ret
