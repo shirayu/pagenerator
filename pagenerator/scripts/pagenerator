@@ -64,7 +64,7 @@ def convert(input_filename, template_name, output_name, encoding=u"UTF-8", bread
     if bread is None:
         bread = u""
     elif bread != u"":
-        bread += u""" &gt; <strong itemprop="title">%s</strong> """ % title
+        bread += u"""<span class="bread" itemprop="title">%s</span>""" % title
         pass
     
     d = {u'content' : content_html,
