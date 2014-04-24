@@ -87,7 +87,7 @@ def get_bread(pathroot, titles):
         mytitle = titles[key]
         rets.append(u"""<a href="/%s" itemprop="url"><span itemprop="title">%s</span></a>""" % (key, mytitle))
 
-    ret = u" &gt; ".join(rets)
+    ret = u"".join(rets)
     return ret
 
 def clean_path(path):
