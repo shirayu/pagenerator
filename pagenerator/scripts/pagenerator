@@ -158,6 +158,6 @@ if __name__ == '__main__':
     if opts.recursive:
         recursive(opts.input, opts.template, opts.output, breads=opts.breads, force=opts.force)
     else:
-        convert(opts.input, opts.template, opts.output, opts.force)
+        convert(opts.input, opts.template, opts.output, force=opts.force)
 
 
