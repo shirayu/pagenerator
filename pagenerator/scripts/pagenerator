@@ -111,10 +111,11 @@ def clean_path(path):
     return path
 
 def get_index_position(files):
-    for name in [u"index.md", u"index.mkd"]:
-        myindex = files.index(name)
-        if myindex != -1:
-            return myindex
+    try:
+        myindex = files.index("index.md")
+        return myindex
+    except ValueError:
+        return -1
     return -1
 
 import os
