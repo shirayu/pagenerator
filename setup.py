@@ -32,7 +32,7 @@ from setuptools import setup, find_packages
 # Prevent setuptools from trying to add extra files to the source code
 # manifest by scanning the version control system for its contents.
 from setuptools.command import sdist
-del sdist.finders[:]
+# del sdist.finders[:]
 
 #################
 import sys
