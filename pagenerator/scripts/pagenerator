@@ -20,15 +20,15 @@ import markdown
 
 
 def get_title(text):
-    for line in text.split(u"\n"):
+    for line in text.split("\n"):
         line = line.lstrip().rstrip()
-        if line.startswith(u"#"):
+        if line.startswith("#"):
             return line[1:].lstrip()
-    return u""
+    return ""
 
 
 def mkdirs(folder_name):
-    assert isinstance(folder_name, unicode)
+    assert isinstance(folder_name, str)
     try:
         os.makedirs(folder_name)
     except OSError as exc:  # Python >2.5
@@ -41,16 +41,16 @@ def mkdirs(folder_name):
 
 def get_mydict(mydict, input_filename):
     thisdict = mydict.copy()
-    for k, v in thisdict.items():
-        if u":" in k:
-            myprefix, myk = k.split(u':', 1)
+    for k, v in list(thisdict.items()):
+        if ":" in k:
+            myprefix, myk = k.split(':', 1)
             if input_filename.startswith(myprefix):
                 thisdict[myk] = v
             del thisdict[k]
     return thisdict
 
 
-def convert(input_filename, template_name, output_name, encoding=u"UTF-8", bread=None, force=False, mydict={}):
+def convert(input_filename, template_name, output_name, encoding="UTF-8", bread=None, force=False, mydict={}):
     isinstance(force, bool)
 
     (head, tail) = os.path.split(output_name)
@@ -63,7 +63,7 @@ def convert(input_filename, template_name, output_name, encoding=u"UTF-8", bread
     with codecs.open(template_name, 'r', encoding) as fp:
         template = string.Template(fp.read())
 
-    if output_name == u"-":
+    if output_name == "-":
         sys.stdout = codecs.getwriter('utf_8')(sys.stdout)
         myout = sys.stdout
     else:
@@ -76,14 +76,14 @@ def convert(input_filename, template_name, output_name, encoding=u"UTF-8", bread
 
     content_html = markdown.markdown(content_text, extensions=['fenced_code', 'tables'])
     if bread is None:
-        bread = u""
-    elif bread != u"":
-        bread += u"""<li class="bread" itemprop="title">%s</li>""" % title
+        bread = ""
+    elif bread != "":
+        bread += """<li class="bread" itemprop="title">%s</li>""" % title
         pass
 
-    d = {u'content': content_html,
-         u'title': title,
-         u"bread": bread}
+    d = {'content': content_html,
+         'title': title,
+         "bread": bread}
     thisdict = get_mydict(mydict, input_filename)
     d.update(thisdict)
 
@@ -96,28 +96,28 @@ def convert(input_filename, template_name, output_name, encoding=u"UTF-8", bread
 
 def get_bread(pathroot, titles):
 
-    paths = pathroot.split(u"/")
+    paths = pathroot.split("/")
     rets = []
 
-    for i in xrange(1, len(paths)):
-        key = u"/".join(paths[:i])
+    for i in range(1, len(paths)):
+        key = "/".join(paths[:i])
         mytitle = titles[key]
-        rets.append(u"""\n""")
-        rets.append(u"""<li class="bread" itemprop="itemListElement"  """
+        rets.append("""\n""")
+        rets.append("""<li class="bread" itemprop="itemListElement"  """
                     """itemscope="" itemtype="https://schema.org/ListItem">\n""")
-        rets.append(u"""<meta itemprop="position" content="%d" />\n""" % i)
-        rets.append(u"""<a href="/%s" itemprop="item" itemprop="url">"""
+        rets.append("""<meta itemprop="position" content="%d" />\n""" % i)
+        rets.append("""<a href="/%s" itemprop="item" itemprop="url">"""
                     """<span itemprop="name">%s</span></a></li>""" % (key, mytitle))
 
-    ret = u"".join(rets)
+    ret = "".join(rets)
     return ret
 
 
 def clean_path(path):
-    if path.endswith(u"/"):
+    if path.endswith("/"):
         path = path[:-1]
-    elif path.endswith(u"/index"):
-        path = path[:-len(u"/index")]
+    elif path.endswith("/index"):
+        path = path[:-len("/index")]
     return path
 
 
@@ -130,7 +130,7 @@ def get_index_position(files):
     return -1
 
 
-def recursive(input_filename, template_name, output_name, encoding=u"UTF-8", breads=[], force=False, mydict={}):
+def recursive(input_filename, template_name, output_name, encoding="UTF-8", breads=[], force=False, mydict={}):
     isinstance(force, bool)
 
     titles = {}
@@ -147,9 +147,9 @@ def recursive(input_filename, template_name, output_name, encoding=u"UTF-8", bre
             myfilename = os.path.join(root, fname)
             myoutname0 = myfilename[len(input_filename) + 1:]
             (myoutroot, myoutext) = os.path.splitext(myoutname0)
-            if myoutext not in [u".md", u".mkd"]:
+            if myoutext not in [".md", ".mkd"]:
                 continue
-            myoutname = os.path.join(output_name, myoutroot + u".html")
+            myoutname = os.path.join(output_name, myoutroot + ".html")
             myoutroot2 = clean_path(myoutroot)
 
             mybread = None
@@ -164,24 +164,24 @@ def recursive(input_filename, template_name, output_name, encoding=u"UTF-8", bre
 
             if flg:
                 titles[myoutroot2] = title
-            print myfilename, myoutname, title.encode("utf8")
+            print(myfilename, myoutname, title)
 
 
 if __name__ == '__main__':
     oparser = argparse.ArgumentParser(description='A generator of a web page')
 
-    oparser.add_argument('-i', '--input', dest='input', type=unicode, help='', required=True)
-    oparser.add_argument('-o', '--output', dest='output', type=unicode, help='', required=True)
-    oparser.add_argument('-t', '--template', dest='template', type=unicode, help='', required=True)
+    oparser.add_argument('-i', '--input', dest='input', type=str, help='', required=True)
+    oparser.add_argument('-o', '--output', dest='output', type=str, help='', required=True)
+    oparser.add_argument('-t', '--template', dest='template', type=str, help='', required=True)
 
     oparser.add_argument('-R', dest='recursive', action="store_true", help='Convert recursively', default=False)
     oparser.add_argument('-f', '--force', dest='force', action="store_true", help='Force generation', default=False)
     oparser.add_argument('--breads', dest='breads', action="append",
-                         help='Make breadCrumb for this prefix paths', default=[], type=unicode)
+                         help='Make breadCrumb for this prefix paths', default=[], type=str)
     oparser.add_argument('--dict', dest='mydict', help='Keywords list', default='{}', type=str)
     opts = oparser.parse_args()
 
-    mydict = json.loads(unicode(opts.mydict, sys.stdin.encoding))
+    mydict = json.loads(opts.mydict)
 
     if opts.recursive:
         recursive(opts.input, opts.template, opts.output, breads=opts.breads, force=opts.force, mydict=mydict)
