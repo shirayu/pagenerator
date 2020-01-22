@@ -98,7 +98,9 @@ def get_bread(pathroot, titles):
     for i in xrange(1, len(paths)):
         key = u"/".join(paths[:i])
         mytitle = titles[key]
-        rets.append(u"""<li class="bread" itemprop="title"><a href="/%s" itemprop="url">%s</a></li>""" % (key, mytitle))
+        rets.append(u"""<li class="bread" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem">""")
+        rets.append(u"""<meta itemprop="position" content="%d" />""" % i)
+        rets.append(u"""<a href="/%s" itemprop="item" itemprop="url"><span itemprop="name">%s</span></a></li>""" % (key, mytitle))
 
     ret = u"".join(rets)
     return ret
