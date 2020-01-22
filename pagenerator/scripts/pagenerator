@@ -3,19 +3,21 @@
 
 """
 """
-__author__ = 'Yuta Hayashibe' 
+__author__ = 'Yuta Hayashibe'
 __version__ = ""
 __copyright__ = ""
 __license__ = "GPL v3"
 
 
 import argparse
-
-import markdown
 import codecs
+import json
+import os
+import string
 import sys
 
-import string
+import markdown
+
 
 def get_title(text):
     for line in text.split(u"\n"):
@@ -24,16 +26,18 @@ def get_title(text):
             return line[1:].lstrip()
     return u""
 
-import os
+
 def mkdirs(folder_name):
     assert isinstance(folder_name, unicode)
     try:
         os.makedirs(folder_name)
-    except OSError as exc: # Python >2.5
+    except OSError as exc:  # Python >2.5
         import errno
         if exc.errno == errno.EEXIST:
             pass
-        else: raise
+        else:
+            raise
+
 
 def get_mydict(mydict, input_filename):
     thisdict = mydict.copy()
@@ -45,7 +49,7 @@ def get_mydict(mydict, input_filename):
             del thisdict[k]
     return thisdict
 
-import os
+
 def convert(input_filename, template_name, output_name, encoding=u"UTF-8", bread=None, force=False, mydict={}):
     isinstance(force, bool)
 
@@ -76,10 +80,10 @@ def convert(input_filename, template_name, output_name, encoding=u"UTF-8", bread
     elif bread != u"":
         bread += u"""<li class="bread" itemprop="title">%s</li>""" % title
         pass
-    
-    d = {u'content' : content_html,
-            u'title' : title,
-            u"bread" : bread}
+
+    d = {u'content': content_html,
+         u'title': title,
+         u"bread": bread}
     thisdict = get_mydict(mydict, input_filename)
     d.update(thisdict)
 
@@ -92,18 +96,22 @@ def convert(input_filename, template_name, output_name, encoding=u"UTF-8", bread
 
 def get_bread(pathroot, titles):
 
-    paths =  pathroot.split(u"/")
+    paths = pathroot.split(u"/")
     rets = []
 
     for i in xrange(1, len(paths)):
         key = u"/".join(paths[:i])
         mytitle = titles[key]
-        rets.append(u"""<li class="bread" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem">""")
-        rets.append(u"""<meta itemprop="position" content="%d" />""" % i)
-        rets.append(u"""<a href="/%s" itemprop="item" itemprop="url"><span itemprop="name">%s</span></a></li>""" % (key, mytitle))
+        rets.append(u"""\n""")
+        rets.append(u"""<li class="bread" itemprop="itemListElement"  """
+                    """itemscope="" itemtype="https://schema.org/ListItem">\n""")
+        rets.append(u"""<meta itemprop="position" content="%d" />\n""" % i)
+        rets.append(u"""<a href="/%s" itemprop="item" itemprop="url">"""
+                    """<span itemprop="name">%s</span></a></li>""" % (key, mytitle))
 
     ret = u"".join(rets)
     return ret
+
 
 def clean_path(path):
     if path.endswith(u"/"):
@@ -111,6 +119,7 @@ def clean_path(path):
     elif path.endswith(u"/index"):
         path = path[:-len(u"/index")]
     return path
+
 
 def get_index_position(files):
     try:
@@ -120,7 +129,7 @@ def get_index_position(files):
         return -1
     return -1
 
-import os
+
 def recursive(input_filename, template_name, output_name, encoding=u"UTF-8", breads=[], force=False, mydict={}):
     isinstance(force, bool)
 
@@ -128,7 +137,7 @@ def recursive(input_filename, template_name, output_name, encoding=u"UTF-8", bre
 
     for root, dirs, files in os.walk(input_filename):
 
-        #swap filenames to get names of index.md first
+        # swap filenames to get names of index.md first
         index_pos = get_index_position(files)
         if index_pos != -1:
             files[0], files[index_pos] = files[index_pos], files[0]
@@ -136,13 +145,13 @@ def recursive(input_filename, template_name, output_name, encoding=u"UTF-8", bre
         for fname in files:
 
             myfilename = os.path.join(root, fname)
-            myoutname0 = myfilename[len(input_filename)+1:]
+            myoutname0 = myfilename[len(input_filename) + 1:]
             (myoutroot, myoutext) = os.path.splitext(myoutname0)
             if myoutext not in [u".md", u".mkd"]:
                 continue
             myoutname = os.path.join(output_name, myoutroot + u".html")
             myoutroot2 = clean_path(myoutroot)
-            
+
             mybread = None
             flg = False
             for bread in breads:
@@ -158,18 +167,17 @@ def recursive(input_filename, template_name, output_name, encoding=u"UTF-8", bre
             print myfilename, myoutname, title.encode("utf8")
 
 
-import sys
-import json
 if __name__ == '__main__':
     oparser = argparse.ArgumentParser(description='A generator of a web page')
 
-    oparser.add_argument('-i', '--input', dest = 'input', type=unicode, help='', required=True)
-    oparser.add_argument('-o', '--output', dest = 'output', type=unicode, help='', required=True)
-    oparser.add_argument('-t', '--template', dest = 'template', type=unicode, help='', required=True)
+    oparser.add_argument('-i', '--input', dest='input', type=unicode, help='', required=True)
+    oparser.add_argument('-o', '--output', dest='output', type=unicode, help='', required=True)
+    oparser.add_argument('-t', '--template', dest='template', type=unicode, help='', required=True)
 
     oparser.add_argument('-R', dest='recursive', action="store_true", help='Convert recursively', default=False)
     oparser.add_argument('-f', '--force', dest='force', action="store_true", help='Force generation', default=False)
-    oparser.add_argument('--breads', dest='breads', action="append", help='Make breadCrumb for this prefix paths', default=[], type=unicode)
+    oparser.add_argument('--breads', dest='breads', action="append",
+                         help='Make breadCrumb for this prefix paths', default=[], type=unicode)
     oparser.add_argument('--dict', dest='mydict', help='Keywords list', default='{}', type=str)
     opts = oparser.parse_args()
 
@@ -179,5 +187,3 @@ if __name__ == '__main__':
         recursive(opts.input, opts.template, opts.output, breads=opts.breads, force=opts.force, mydict=mydict)
     else:
         convert(opts.input, opts.template, opts.output, force=opts.force, mydict=mydict)
-
-
