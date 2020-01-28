@@ -79,7 +79,7 @@ def convert(input_filename, template_name, output_name, encoding="UTF-8", bread=
         bread = ""
     elif bread != "":
         bread += """<li class="bread" itemprop="title">%s</li>""" % title
-        pass
+        bread = '''<ul id="breadCrumb" itemscope="" itemtype="https://schema.org/BreadcrumbList">%s</ul>''' % bread
 
     d = {'content': content_html,
          'title': title,
