@@ -106,7 +106,7 @@ def get_bread(pathroot, titles):
         rets.append("""<li class="bread" itemprop="itemListElement"  """
                     """itemscope="" itemtype="https://schema.org/ListItem">\n""")
         rets.append("""<meta itemprop="position" content="%d" />\n""" % i)
-        rets.append("""<a href="/%s" itemprop="item" itemprop="url">"""
+        rets.append("""<a href="/%s" itemprop="item">"""
                     """<span itemprop="name">%s</span></a></li>""" % (key, mytitle))
 
     ret = "".join(rets)
