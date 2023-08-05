@@ -1,4 +1,0 @@
-include LICENSE.txt INSTALL.txt README* MANIFEST.in
-include setup.py
-include pagenerator/VERSION
-global-exclude *~

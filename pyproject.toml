@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "pagenerator"
+version = "0.1.0"
+description = ""
+authors = ["Yuta Hayashibe <yuta@hayashibe.jp>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+markdown = "^3.4.4"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+pagenerator = "pagenerator.cli:main"
