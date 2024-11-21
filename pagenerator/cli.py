@@ -77,10 +77,7 @@ def convert(
         bread = ""
     elif bread != "":
         bread += """<li class="bread" itemprop="title">%s</li>""" % title
-        bread = (
-            """<ul id="breadCrumb" itemscope="" itemtype="https://schema.org/BreadcrumbList">%s</ul>"""
-            % bread
-        )
+        bread = """<ul id="breadCrumb" itemscope="" itemtype="https://schema.org/BreadcrumbList">%s</ul>""" % bread
 
     d = {"content": content_html, "title": title, "bread": bread}
     thisdict = get_mydict(mydict, input_filename)
@@ -107,8 +104,7 @@ def get_bread(pathroot, titles):
         )
         rets.append("""<meta itemprop="position" content="%d" />\n""" % i)
         rets.append(
-            """<a href="/%s" itemprop="item">"""
-            """<span itemprop="name">%s</span></a></li>""" % (key, mytitle)
+            """<a href="/%s" itemprop="item">""" """<span itemprop="name">%s</span></a></li>""" % (key, mytitle)
         )
 
     ret = "".join(rets)
@@ -186,15 +182,9 @@ def recursive(
 def main():
     oparser = argparse.ArgumentParser(description="A generator of a web page")
 
-    oparser.add_argument(
-        "-i", "--input", dest="input", type=str, help="", required=True
-    )
-    oparser.add_argument(
-        "-o", "--output", dest="output", type=str, help="", required=True
-    )
-    oparser.add_argument(
-        "-t", "--template", dest="template", type=str, help="", required=True
-    )
+    oparser.add_argument("-i", "--input", dest="input", type=str, help="", required=True)
+    oparser.add_argument("-o", "--output", dest="output", type=str, help="", required=True)
+    oparser.add_argument("-t", "--template", dest="template", type=str, help="", required=True)
 
     oparser.add_argument(
         "-R",
@@ -219,9 +209,7 @@ def main():
         default=[],
         type=str,
     )
-    oparser.add_argument(
-        "--dict", dest="mydict", help="Keywords list", default="{}", type=str
-    )
+    oparser.add_argument("--dict", dest="mydict", help="Keywords list", default="{}", type=str)
     opts = oparser.parse_args()
 
     mydict = json.loads(opts.mydict)
