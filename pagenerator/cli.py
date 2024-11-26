@@ -1,11 +1,8 @@
 #!/usr/bin/env python
-
 import argparse
-import codecs
 import json
 import os
 import string
-import sys
 from pathlib import Path
 
 import markdown
@@ -36,29 +33,27 @@ def get_mydict(
 
 def convert(
     *,
-    input_filename,
+    input_filename: str,
     template_name,
     output_name,
-    encoding="UTF-8",
     bread=None,
     force=False,
     mydict: dict,
 ):
     isinstance(force, bool)
 
-    (head, tail) = os.path.split(output_name)
+    (head, _) = os.path.split(output_name)
     if len(head) != 0:
         Path(head).mkdir(exist_ok=True, parents=True)
 
-    with codecs.open(input_filename, "r", encoding) as fp:
+    with Path(input_filename).open() as fp:
         content_text = fp.read()
         title = get_title(content_text)
-    with codecs.open(template_name, "r", encoding) as fp:
+    with Path(template_name).open() as fp:
         template = string.Template(fp.read())
 
     if output_name == "-":
-        sys.stdout = codecs.getwriter("utf_8")(sys.stdout)  # noqa
-        myout = sys.stdout
+        pass
     else:
         if (
             not force
@@ -67,8 +62,6 @@ def convert(
             and os.stat(template_name).st_mtime < os.stat(output_name).st_mtime
         ):
             return title
-
-        myout = codecs.open(output_name, "w", encoding)
 
     content_html = markdown.markdown(
         content_text,
@@ -93,7 +86,8 @@ def convert(
 
     html = template.substitute(d)
 
-    myout.write(html)
+    with Path(output_name).open("w") as outf:
+        outf.write(html)
 
     return title
 
@@ -138,7 +132,6 @@ def recursive(
     input_filename,
     template_name,
     output_name,
-    encoding="UTF-8",
     breads: list[str],
     force=False,
     mydict: dict,
@@ -174,7 +167,6 @@ def recursive(
                 input_filename=myfilename,
                 template_name=template_name,
                 output_name=myoutname,
-                encoding=encoding,
                 bread=mybread,
                 force=force,
                 mydict=mydict,
