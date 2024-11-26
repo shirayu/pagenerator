@@ -74,8 +74,8 @@ def convert(
     if bread is None:
         bread = ""
     elif bread != "":
-        bread += """<li class="bread" itemprop="title">%s</li>""" % title
-        bread = """<ul id="breadCrumb" itemscope="" itemtype="https://schema.org/BreadcrumbList">%s</ul>""" % bread
+        bread += f"""<li class="bread" itemprop="title">{title}</li>""" 
+        bread = """<ul id="breadCrumb" itemscope="" itemtype="https://schema.org/BreadcrumbList">{bread}</ul>""" 
 
     d = {"content": content_html, "title": title, "bread": bread}
     thisdict = get_mydict(
@@ -140,7 +140,7 @@ def recursive(
 
     titles = {}
 
-    for root, dirs, files in os.walk(input_filename):
+    for root, _, files in os.walk(input_filename):
         # swap filenames to get names of index.md first
         index_pos = get_index_position(files)
         if index_pos != -1:
