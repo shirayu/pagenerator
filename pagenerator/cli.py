@@ -75,7 +75,7 @@ def convert(
         bread = ""
     elif bread != "":
         bread += f"""<li class="bread" itemprop="title">{title}</li>"""
-        bread = """<ul id="breadCrumb" itemscope="" itemtype="https://schema.org/BreadcrumbList">{bread}</ul>"""
+        bread = f"""<ul id="breadCrumb" itemscope="" itemtype="https://schema.org/BreadcrumbList">{bread}</ul>"""
 
     d = {"content": content_html, "title": title, "bread": bread}
     thisdict = get_mydict(
