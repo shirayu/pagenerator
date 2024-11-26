@@ -11,7 +11,7 @@ from pathlib import Path
 import markdown
 
 
-def get_title(text):
+def get_title(text: str) -> str:
     for line in text.split("\n"):
         line = line.lstrip().rstrip()
         if line.startswith("#"):
@@ -19,7 +19,11 @@ def get_title(text):
     return ""
 
 
-def get_mydict(mydict, input_filename):
+def get_mydict(
+    *,
+    mydict: dict,
+    input_filename: str,
+):
     thisdict = mydict.copy()
     for k, v in list(thisdict.items()):
         if ":" in k:
@@ -31,13 +35,14 @@ def get_mydict(mydict, input_filename):
 
 
 def convert(
+    *,
     input_filename,
     template_name,
     output_name,
     encoding="UTF-8",
     bread=None,
     force=False,
-    mydict={},
+    mydict: dict,
 ):
     isinstance(force, bool)
 
@@ -80,7 +85,10 @@ def convert(
         bread = """<ul id="breadCrumb" itemscope="" itemtype="https://schema.org/BreadcrumbList">%s</ul>""" % bread
 
     d = {"content": content_html, "title": title, "bread": bread}
-    thisdict = get_mydict(mydict, input_filename)
+    thisdict = get_mydict(
+        mydict=mydict,
+        input_filename=input_filename,
+    )
     d.update(thisdict)
 
     html = template.substitute(d)
@@ -96,17 +104,14 @@ def get_bread(pathroot, titles):
 
     for i in range(1, len(paths)):
         key = "/".join(paths[:i])
-        mytitle = titles[key]
+        mytitle: str = titles[key]
         rets.append("""\n""")
         rets.append(
             """<li class="bread" itemprop="itemListElement"  """
             """itemscope="" itemtype="https://schema.org/ListItem">\n"""
         )
-        rets.append("""<meta itemprop="position" content="%d" />\n""" % i)
-        rets.append(
-            """<a href="/%s" itemprop="item">""" """<span itemprop="name">%s</span></a></li>""" % (key, mytitle)
-        )
-
+        rets.append(f"""<meta itemprop="position" content="{i}" />\n""")
+        rets.append(f"""<a href="/{key}" itemprop="item"><span itemprop="name">{mytitle}</span></a></li>""")
     ret = "".join(rets)
     return ret
 
@@ -124,18 +129,19 @@ def get_index_position(files):
         myindex = files.index("index.md")
         return myindex
     except ValueError:
-        return -1
+        pass
     return -1
 
 
 def recursive(
+    *,
     input_filename,
     template_name,
     output_name,
     encoding="UTF-8",
-    breads=[],
+    breads: list[str],
     force=False,
-    mydict={},
+    mydict: dict,
 ):
     isinstance(force, bool)
 
@@ -165,10 +171,10 @@ def recursive(
                     break
 
             title = convert(
-                myfilename,
-                template_name,
-                myoutname,
-                encoding,
+                input_filename=myfilename,
+                template_name=template_name,
+                output_name=myoutname,
+                encoding=encoding,
                 bread=mybread,
                 force=force,
                 mydict=mydict,
@@ -216,15 +222,21 @@ def main():
 
     if opts.recursive:
         recursive(
-            opts.input,
-            opts.template,
-            opts.output,
+            input_filename=opts.input,
+            template_name=opts.template,
+            output_name=opts.output,
             breads=opts.breads,
             force=opts.force,
             mydict=mydict,
         )
     else:
-        convert(opts.input, opts.template, opts.output, force=opts.force, mydict=mydict)
+        convert(
+            input_filename=opts.input,
+            template_name=opts.template,
+            output_name=opts.output,
+            force=opts.force,
+            mydict=mydict,
+        )
 
 
 if __name__ == "__main__":
