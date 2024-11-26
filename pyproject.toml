@@ -10,6 +10,12 @@ dependencies = ["markdown>=3.7"]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.uv]
+dev-dependencies = [
+    "ruff>=0.6.6",
+    "yamllint>=1.35.1",
+]
+
 [tool.pyright]
 pythonVersion = "3.12"
 typeCheckingMode = "basic"
