@@ -1,21 +1,21 @@
 {
-    "author": "",
-    "description": "",
-    "devDependencies": {
-        "markdown-it": "^14.1.0",
-        "markdownlint-cli": "^0.43.0",
-        "pyright": "^1.1.392"
-    },
-    "engines": {
-        "npm": "Use pnpm instead of npm!"
-    },
-    "license": "",
-    "main": "",
-    "name": "pyright-exec",
-    "scripts": {
-        "preinstall": "npx only-allow pnpm",
-        "pyright": "pyright"
-    },
-    "version": "1.0.0",
-    "packageManager": "pnpm@9.12.0+sha512.4abf725084d7bcbafbd728bfc7bee61f2f791f977fd87542b3579dcb23504d170d46337945e4c66485cd12d588a0c0e570ed9c477e7ccdd8507cf05f3f92eaca"
+  "author": "",
+  "description": "",
+  "devDependencies": {
+    "markdown-it": "^14.1.0",
+    "markdownlint-cli": "^0.43.0",
+    "pyright": "^1.1.392"
+  },
+  "engines": {
+    "npm": "Use pnpm instead of npm!"
+  },
+  "license": "",
+  "main": "",
+  "name": "pyright-exec",
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "pyright": "pyright"
+  },
+  "version": "1.0.0",
+  "packageManager": "pnpm@9.12.0+sha512.4abf725084d7bcbafbd728bfc7bee61f2f791f977fd87542b3579dcb23504d170d46337945e4c66485cd12d588a0c0e570ed9c477e7ccdd8507cf05f3f92eaca"
 }
