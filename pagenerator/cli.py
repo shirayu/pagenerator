@@ -2,6 +2,7 @@
 import argparse
 import json
 import os
+import re
 import string
 from pathlib import Path
 
@@ -12,7 +13,20 @@ def get_title(text: str) -> str:
     for line in text.split("\n"):
         line = line.lstrip().rstrip()
         if line.startswith("#"):
-            return line[1:].lstrip()
+            return line.lstrip("#").lstrip()
+    return ""
+
+
+def get_og_description(text: str) -> str:
+    # Remove code blocks to avoid false matches
+    code_block_pattern = r"```.*?```"
+    text_without_code = re.sub(code_block_pattern, "", text, flags=re.DOTALL)
+
+    patterns = [r"<!--\s*og:description:\s*(.+?)\s*-->", r"<!--\s*og:description\s+(.+?)\s*-->"]
+    for pattern in patterns:
+        match = re.search(pattern, text_without_code, re.IGNORECASE)
+        if match:
+            return match.group(1).strip()
     return ""
 
 
@@ -49,6 +63,7 @@ def convert(
     with Path(input_filename).open() as fp:
         content_text = fp.read()
         title = get_title(content_text)
+        og_description = get_og_description(content_text)
     with Path(template_name).open() as fp:
         template = string.Template(fp.read())
 
@@ -77,7 +92,7 @@ def convert(
         bread += f"""<li class="bread" itemprop="title">{title}</li>"""
         bread = f"""<ul id="breadCrumb" itemscope="" itemtype="https://schema.org/BreadcrumbList">{bread}</ul>"""
 
-    d = {"content": content_html, "title": title, "bread": bread}
+    d = {"content": content_html, "title": title, "bread": bread, "og_description": og_description}
     thisdict = get_mydict(
         mydict=mydict,
         input_filename=input_filename,

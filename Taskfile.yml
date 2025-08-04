@@ -45,3 +45,4 @@ tasks:
   test:
     cmds:
       - pnpm test
+      - uv run python -m unittest tests.test_cli -v
