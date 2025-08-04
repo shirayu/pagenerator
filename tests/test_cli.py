@@ -1,6 +1,8 @@
+import sys
 import unittest
+from io import StringIO
 
-from pagenerator.cli import get_og_description, get_title, remove_meta_comments
+from pagenerator.cli import check_unsupported_meta_tags, get_og_description, get_title, remove_meta_comments
 
 
 class TestCli(unittest.TestCase):
@@ -150,6 +152,81 @@ class TestCli(unittest.TestCase):
         text = "# タイトル\n\n本文です。\n<!-- 普通のコメント -->"
         expected = "# タイトル\n\n本文です。\n<!-- 普通のコメント -->"
         self.assertEqual(remove_meta_comments(text), expected)
+
+    def test_check_unsupported_meta_tags_no_unsupported(self):
+        text = "# タイトル\n\n<!-- og:description: サポートされているタグ -->\n\n本文です。"
+        # Capture stderr
+        old_stderr = sys.stderr
+        sys.stderr = captured_stderr = StringIO()
+        try:
+            check_unsupported_meta_tags(text)
+            self.assertEqual(captured_stderr.getvalue(), "")
+        finally:
+            sys.stderr = old_stderr
+
+    def test_check_unsupported_meta_tags_with_unsupported(self):
+        text = """# タイトル
+
+<!-- og:description: サポートされているタグ -->
+<!-- og:title: 未対応タグ1 -->
+<!-- twitter:card: 未対応タグ2 -->
+<!-- custom:tag: カスタムタグ -->
+
+本文です。"""
+        # Capture stderr
+        old_stderr = sys.stderr
+        sys.stderr = captured_stderr = StringIO()
+        try:
+            check_unsupported_meta_tags(text)
+            output = captured_stderr.getvalue()
+            self.assertIn("警告: 未対応のメタタグが見つかりました:", output)
+            self.assertIn("custom:tag", output)
+            self.assertIn("og:title", output)
+            self.assertIn("twitter:card", output)
+            self.assertNotIn("og:description", output)
+        finally:
+            sys.stderr = old_stderr
+
+    def test_check_unsupported_meta_tags_in_code_block_ignored(self):
+        text = """# タイトル
+
+```
+<!-- og:title: コードブロック内のタグ -->
+```
+
+<!-- og:description: 実際のタグ -->
+
+本文です。"""
+        # Capture stderr
+        old_stderr = sys.stderr
+        sys.stderr = captured_stderr = StringIO()
+        try:
+            check_unsupported_meta_tags(text)
+            self.assertEqual(captured_stderr.getvalue(), "")
+        finally:
+            sys.stderr = old_stderr
+
+    def test_check_unsupported_meta_tags_sorted_output(self):
+        text = """# タイトル
+
+<!-- zebra:tag: Z最後のタグ -->
+<!-- apple:tag: A最初のタグ -->
+<!-- banana:tag: B中間のタグ -->
+
+本文です。"""
+        # Capture stderr
+        old_stderr = sys.stderr
+        sys.stderr = captured_stderr = StringIO()
+        try:
+            check_unsupported_meta_tags(text)
+            output = captured_stderr.getvalue()
+            # アルファベット順になっているかチェック
+            apple_pos = output.find("apple:tag")
+            banana_pos = output.find("banana:tag")
+            zebra_pos = output.find("zebra:tag")
+            self.assertTrue(apple_pos < banana_pos < zebra_pos)
+        finally:
+            sys.stderr = old_stderr
 
 
 if __name__ == "__main__":

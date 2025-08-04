@@ -4,6 +4,7 @@ import json
 import os
 import re
 import string
+import sys
 from pathlib import Path
 
 import markdown
@@ -30,7 +31,34 @@ def get_og_description(text: str) -> str:
     return ""
 
 
+def check_unsupported_meta_tags(text: str) -> None:
+    supported_tags = {"og:description"}
+
+    # Remove code blocks to avoid false matches
+    code_block_pattern = r"```.*?```"
+    text_without_code = re.sub(code_block_pattern, "", text, flags=re.DOTALL)
+
+    # Find all xx:yy format tags in comments
+    patterns = [
+        r"<!--\s*([a-zA-Z_][a-zA-Z0-9_]*):([a-zA-Z_][a-zA-Z0-9_]*):\s*(.+?)\s*-->",
+        r"<!--\s*([a-zA-Z_][a-zA-Z0-9_]*):([a-zA-Z_][a-zA-Z0-9_]*)\s+(.+?)\s*-->",
+    ]
+    found_tags = set()
+
+    for pattern in patterns:
+        matches = re.finditer(pattern, text_without_code, re.IGNORECASE)
+        for match in matches:
+            tag_name = f"{match.group(1).lower()}:{match.group(2).lower()}"
+            if tag_name not in supported_tags:
+                found_tags.add(tag_name)
+
+    if found_tags:
+        sorted_tags = sorted(found_tags)
+        print(f"警告: 未対応のメタタグが見つかりました: {', '.join(sorted_tags)}", file=sys.stderr)
+
+
 def remove_meta_comments(text: str) -> str:
+    # Original patterns for backward compatibility (still only removes og/twitter tags)
     patterns = [r"<!--\s*(og|twitter):[^:]+:\s*(.+?)\s*-->", r"<!--\s*(og|twitter):[^:]+\s+(.+?)\s*-->"]
     for pattern in patterns:
         text = re.sub(pattern, "", text, flags=re.IGNORECASE)
@@ -71,6 +99,7 @@ def convert(
         content_text = fp.read()
         title = get_title(content_text)
         og_description = get_og_description(content_text)
+        check_unsupported_meta_tags(content_text)
     with Path(template_name).open() as fp:
         template = string.Template(fp.read())
 
