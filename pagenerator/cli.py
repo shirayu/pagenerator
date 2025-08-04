@@ -139,7 +139,11 @@ def convert(
         og_description = thisdict["og_description"]
 
     d = {"content": content_html, "title": title, "bread": bread, "og_description": og_description}
-    d.update(thisdict)
+
+    # Add other dict values but preserve og_description that was already determined
+    for key, value in thisdict.items():
+        if key != "og_description":
+            d[key] = value
 
     html = template.substitute(d)
 
