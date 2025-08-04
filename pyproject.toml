@@ -10,7 +10,7 @@ dependencies = ["markdown>=3.7"]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[scripts]
+[project.scripts]
 pagenerator = "pagenerator.cli:main"
 
 [tool.uv]
