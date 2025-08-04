@@ -25,9 +25,12 @@ def get_og_description(text: str) -> str:
 
     patterns = [r"<!--\s*og:description:\s*(.+?)\s*-->", r"<!--\s*og:description\s+(.+?)\s*-->"]
     for pattern in patterns:
-        match = re.search(pattern, text_without_code, re.IGNORECASE)
+        match = re.search(pattern, text_without_code, re.IGNORECASE | re.DOTALL)
         if match:
-            return match.group(1).strip()
+            description = match.group(1).strip()
+            # Replace newlines with <br> tags for og:description
+            description = re.sub(r"\s*\n\s*", "<br>", description)
+            return description
     return ""
 
 

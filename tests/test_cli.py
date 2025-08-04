@@ -97,6 +97,46 @@ class TestCli(unittest.TestCase):
 続きの本文です。"""
         self.assertEqual(get_og_description(text), "最初の説明文")
 
+    def test_get_og_description_with_newlines(self):
+        text = """# タイトル
+
+<!-- og:description: これは
+複数行にわたる
+説明文です -->
+
+本文です。"""
+        self.assertEqual(get_og_description(text), "これは<br>複数行にわたる<br>説明文です")
+
+    def test_get_og_description_with_newlines_without_colon(self):
+        text = """# タイトル
+
+<!-- og:description これは
+複数行の
+説明文です -->
+
+本文です。"""
+        self.assertEqual(get_og_description(text), "これは<br>複数行の<br>説明文です")
+
+    def test_get_og_description_with_existing_br_tags(self):
+        text = """# タイトル
+
+<!-- og:description: これは<br>
+改行を<br>
+使った説明文です -->
+
+本文です。"""
+        self.assertEqual(get_og_description(text), "これは<br><br>改行を<br><br>使った説明文です")
+
+    def test_get_og_description_with_existing_BR_tags_uppercase(self):
+        text = """# タイトル
+
+<!-- og:description: これは<BR>
+改行を<BR>
+使った説明文です -->
+
+本文です。"""
+        self.assertEqual(get_og_description(text), "これは<BR><br>改行を<BR><br>使った説明文です")
+
     def test_remove_meta_comments_og_description_with_colon(self):
         text = "# タイトル\n\n<!-- og:description: これは説明文です -->\n\n本文です。"
         expected = "# タイトル\n\n\n\n本文です。"

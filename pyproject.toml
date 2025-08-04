@@ -14,7 +14,7 @@ build-backend = "hatchling.build"
 pagenerator = "pagenerator.cli:main"
 
 [tool.uv]
-dev-dependencies = ["ruff>=0.9.6", "yamllint>=1.35.1"]
+dev-dependencies = ["pytest>=8.4.1", "ruff>=0.9.6", "yamllint>=1.35.1"]
 
 [tool.pyright]
 reportDeprecated = "error"
