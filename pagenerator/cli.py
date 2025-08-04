@@ -129,11 +129,16 @@ def convert(
         bread += f"""<li class="bread" itemprop="title">{title}</li>"""
         bread = f"""<ul id="breadCrumb" itemscope="" itemtype="https://schema.org/BreadcrumbList">{bread}</ul>"""
 
-    d = {"content": content_html, "title": title, "bread": bread, "og_description": og_description}
     thisdict = get_mydict(
         mydict=mydict,
         input_filename=input_filename,
     )
+
+    # Use default og_description from dict if not found in content
+    if not og_description and "og_description" in thisdict:
+        og_description = thisdict["og_description"]
+
+    d = {"content": content_html, "title": title, "bread": bread, "og_description": og_description}
     d.update(thisdict)
 
     html = template.substitute(d)
