@@ -1,6 +1,6 @@
 import unittest
 
-from pagenerator.cli import get_og_description, get_title
+from pagenerator.cli import get_og_description, get_title, remove_og_description_comments
 
 
 class TestCli(unittest.TestCase):
@@ -85,6 +85,63 @@ class TestCli(unittest.TestCase):
 
 続きの本文です。"""
         self.assertEqual(get_og_description(text), "最初の説明文")
+
+    def test_remove_og_description_comments_with_colon(self):
+        text = "# タイトル\n\n<!-- og:description: これは説明文です -->\n\n本文です。"
+        expected = "# タイトル\n\n\n\n本文です。"
+        self.assertEqual(remove_og_description_comments(text), expected)
+
+    def test_remove_og_description_comments_without_colon(self):
+        text = "# タイトル\n\n<!-- og:description これは説明文です -->\n\n本文です。"
+        expected = "# タイトル\n\n\n\n本文です。"
+        self.assertEqual(remove_og_description_comments(text), expected)
+
+    def test_remove_og_description_comments_multiple(self):
+        text = """# タイトル
+
+<!-- og:description: 最初の説明文 -->
+
+本文です。
+
+<!-- og:description: 二番目の説明文 -->
+
+続きの本文です。"""
+        expected = """# タイトル
+
+
+
+本文です。
+
+
+
+続きの本文です。"""
+        self.assertEqual(remove_og_description_comments(text), expected)
+
+    def test_remove_og_description_comments_no_comment(self):
+        text = "# タイトル\n\n本文です。"
+        self.assertEqual(remove_og_description_comments(text), text)
+
+    def test_remove_og_description_comments_case_insensitive(self):
+        text = "# タイトル\n\n<!-- OG:DESCRIPTION: 大文字小文字テスト -->\n\n本文です。"
+        expected = "# タイトル\n\n\n\n本文です。"
+        self.assertEqual(remove_og_description_comments(text), expected)
+
+    def test_remove_og_description_comments_preserves_other_comments(self):
+        text = """# タイトル
+
+<!-- 普通のコメント -->
+<!-- og:description: 削除される説明文 -->
+<!-- 別の普通のコメント -->
+
+本文です。"""
+        expected = """# タイトル
+
+<!-- 普通のコメント -->
+
+<!-- 別の普通のコメント -->
+
+本文です。"""
+        self.assertEqual(remove_og_description_comments(text), expected)
 
 
 if __name__ == "__main__":

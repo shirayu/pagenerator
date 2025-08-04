@@ -30,6 +30,13 @@ def get_og_description(text: str) -> str:
     return ""
 
 
+def remove_og_description_comments(text: str) -> str:
+    patterns = [r"<!--\s*og:description:\s*(.+?)\s*-->", r"<!--\s*og:description\s+(.+?)\s*-->"]
+    for pattern in patterns:
+        text = re.sub(pattern, "", text, flags=re.IGNORECASE)
+    return text
+
+
 def get_mydict(
     *,
     mydict: dict,
@@ -78,8 +85,9 @@ def convert(
         ):
             return title
 
+    content_text_cleaned = remove_og_description_comments(content_text)
     content_html = markdown.markdown(
-        content_text,
+        content_text_cleaned,
         extensions=[
             "fenced_code",
             "tables",
