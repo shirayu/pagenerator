@@ -259,10 +259,14 @@ def main():
         default=[],
         type=str,
     )
-    oparser.add_argument("--dict", dest="mydict", help="Keywords list", default="{}", type=str)
+    oparser.add_argument("--dict", dest="mydict", help="Keywords JSON file path", default=None, type=Path)
     opts = oparser.parse_args()
 
-    mydict = json.loads(opts.mydict)
+    if opts.mydict:
+        with opts.mydict.open() as fp:
+            mydict = json.load(fp)
+    else:
+        mydict = {}
 
     if opts.recursive:
         recursive(
