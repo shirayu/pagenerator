@@ -1,7 +1,10 @@
 ---
 name: CI
-on:  # yamllint disable-line rule:truthy
+on:
   push:
+    branches:
+      - main
+      - develop
   pull_request:
     types:
       - opened
@@ -37,10 +40,6 @@ jobs:
             ${{ runner.os }}-uv-store-
 
       - run: uv sync
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4.1.0
