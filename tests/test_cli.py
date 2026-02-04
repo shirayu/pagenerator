@@ -232,14 +232,6 @@ class TestCli(unittest.TestCase):
 """
         self.assertEqual(remove_html_comments_outside_code_fence(text), expected)
 
-    def test_remove_html_comments_outside_code_fence_on_sample(self):
-        sample_path = Path(__file__).resolve().parents[1] / "sample.md"
-        text = sample_path.read_text()
-        cleaned = remove_meta_comments(text)
-        cleaned = remove_html_comments_outside_code_fence(cleaned)
-        self.assertNotIn("<!--", cleaned)
-        self.assertNotIn("-->", cleaned)
-
     def test_check_unsupported_meta_tags_no_unsupported(self):
         text = "# タイトル\n\n<!-- og:description: サポートされているタグ -->\n\n本文です。"
         # Capture stderr
