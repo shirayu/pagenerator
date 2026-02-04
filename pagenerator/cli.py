@@ -68,6 +68,22 @@ def remove_meta_comments(text: str) -> str:
     return text
 
 
+def remove_standalone_html_comments(text: str) -> str:
+    lines = text.splitlines(keepends=True)
+    in_fence = False
+    out_lines = []
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("```"):
+            in_fence = not in_fence
+            out_lines.append(line)
+            continue
+        if not in_fence and stripped.startswith("<!--") and stripped.endswith("-->"):
+            continue
+        out_lines.append(line)
+    return "".join(out_lines)
+
+
 def get_mydict(
     *,
     mydict: dict,
@@ -118,6 +134,7 @@ def convert(
             return title
 
     content_text_cleaned = remove_meta_comments(content_text)
+    content_text_cleaned = remove_standalone_html_comments(content_text_cleaned)
     content_html = markdown.markdown(
         content_text_cleaned,
         extensions=[
