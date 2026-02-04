@@ -10,8 +10,8 @@ from pagenerator.cli import (
     get_mydict,
     get_og_description,
     get_title,
+    remove_html_comments_outside_code_fence,
     remove_meta_comments,
-    remove_standalone_html_comments,
 )
 
 
@@ -203,17 +203,17 @@ class TestCli(unittest.TestCase):
         expected = "# タイトル\n\n本文です。\n<!-- 普通のコメント -->"
         self.assertEqual(remove_meta_comments(text), expected)
 
-    def test_remove_standalone_html_comments_basic(self):
+    def test_remove_html_comments_outside_code_fence_basic(self):
         text = "# タイトル\n\n<!-- 普通のコメント -->\n\n本文です。"
-        expected = "# タイトル\n\n\n本文です。"
-        self.assertEqual(remove_standalone_html_comments(text), expected)
+        expected = "# タイトル\n\n\n\n本文です。"
+        self.assertEqual(remove_html_comments_outside_code_fence(text), expected)
 
-    def test_remove_standalone_html_comments_preserves_inline(self):
+    def test_remove_html_comments_outside_code_fence_removes_inline(self):
         text = "- 士 <!-- 格 -->"
-        expected = "- 士 <!-- 格 -->"
-        self.assertEqual(remove_standalone_html_comments(text), expected)
+        expected = "- 士 "
+        self.assertEqual(remove_html_comments_outside_code_fence(text), expected)
 
-    def test_remove_standalone_html_comments_ignores_code_block(self):
+    def test_remove_html_comments_outside_code_fence_ignores_code_block(self):
         text = """# タイトル
 
 ```html
@@ -228,8 +228,17 @@ class TestCli(unittest.TestCase):
 <!-- コメント -->
 ```
 
+
 """
-        self.assertEqual(remove_standalone_html_comments(text), expected)
+        self.assertEqual(remove_html_comments_outside_code_fence(text), expected)
+
+    def test_remove_html_comments_outside_code_fence_on_sample(self):
+        sample_path = Path(__file__).resolve().parents[1] / "sample.md"
+        text = sample_path.read_text()
+        cleaned = remove_meta_comments(text)
+        cleaned = remove_html_comments_outside_code_fence(cleaned)
+        self.assertNotIn("<!--", cleaned)
+        self.assertNotIn("-->", cleaned)
 
     def test_check_unsupported_meta_tags_no_unsupported(self):
         text = "# タイトル\n\n<!-- og:description: サポートされているタグ -->\n\n本文です。"
@@ -393,7 +402,7 @@ class TestCli(unittest.TestCase):
             self.assertIn("Markdownの説明文", output_content)
             self.assertNotIn("デフォルトの説明文", output_content)
 
-    def test_convert_removes_standalone_html_comments_to_avoid_list_break(self):
+    def test_convert_removes_html_comments_to_avoid_list_break(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir_path = Path(tmpdir)
 
@@ -421,8 +430,8 @@ class TestCli(unittest.TestCase):
             )
 
             output_content = output_file.read_text()
-            self.assertIn("<li>foo</li>", output_content)
-            self.assertIn("<li>bar</li>", output_content)
+            self.assertIn("<li>\n<p>foo</p>\n</li>", output_content)
+            self.assertIn("<li>\n<p>bar</p>\n</li>", output_content)
 
     def test_convert_with_prefix_specific_og_description(self):
         """プレフィックス機能は実際の使用時は相対パスで動作するため、基本的なテストのみ実施"""

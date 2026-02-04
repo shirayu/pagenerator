@@ -68,19 +68,49 @@ def remove_meta_comments(text: str) -> str:
     return text
 
 
-def remove_standalone_html_comments(text: str) -> str:
+def remove_html_comments_outside_code_fence(text: str) -> str:
     lines = text.splitlines(keepends=True)
     in_fence = False
+    in_comment = False
     out_lines = []
+
     for line in lines:
-        stripped = line.strip()
-        if stripped.startswith("```"):
+        newline = ""
+        content = line
+        if line.endswith("\n"):
+            newline = "\n"
+            content = line[:-1]
+
+        stripped = content.strip()
+        if not in_comment and stripped.startswith("```"):
             in_fence = not in_fence
             out_lines.append(line)
             continue
-        if not in_fence and stripped.startswith("<!--") and stripped.endswith("-->"):
+        if in_fence:
+            out_lines.append(line)
             continue
-        out_lines.append(line)
+
+        if in_comment:
+            end = content.find("-->")
+            if end == -1:
+                out_lines.append(newline)
+                continue
+            content = content[end + 3 :]
+            in_comment = False
+
+        while True:
+            start = content.find("<!--")
+            if start == -1:
+                out_lines.append(content + newline)
+                break
+            before = content[:start]
+            end = content.find("-->", start + 4)
+            if end == -1:
+                out_lines.append(before + newline)
+                in_comment = True
+                break
+            content = before + content[end + 3 :]
+
     return "".join(out_lines)
 
 
@@ -134,7 +164,7 @@ def convert(
             return title
 
     content_text_cleaned = remove_meta_comments(content_text)
-    content_text_cleaned = remove_standalone_html_comments(content_text_cleaned)
+    content_text_cleaned = remove_html_comments_outside_code_fence(content_text_cleaned)
     content_html = markdown.markdown(
         content_text_cleaned,
         extensions=[
