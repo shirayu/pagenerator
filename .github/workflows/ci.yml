@@ -25,6 +25,14 @@ jobs:
         with:
           cache: true
 
+      - uses: actions/cache@v4
+        name: Setup uv cache
+        with:
+          path: .venv
+          key: ${{ runner.os }}-uv-store-${{ hashFiles('**/uv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-uv-store-
+
       - run: uv sync
 
       - name: Get pnpm store directory
